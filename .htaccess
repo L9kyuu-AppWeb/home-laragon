@@ -1,0 +1,5 @@
+RewriteEngine On
+# Jika koneksi bukan HTTPS
+RewriteCond %{HTTPS} off
+# Maka alihkan ke HTTPS
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
