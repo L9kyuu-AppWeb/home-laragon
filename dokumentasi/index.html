@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laragon Hub — Cockpit untuk Workspace Lokal Anda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#101010;
+    --paper:#F1EEE4;
+    --paper-alt:#E7E0CC;
+    --white:#FFFCF5;
+    --blue:#375BF4;
+    --coral:#FF5A3C;
+    --lime:#C8FF4D;
+    --shadow-lg: 8px 8px 0 var(--ink);
+    --shadow: 6px 6px 0 var(--ink);
+    --shadow-sm: 4px 4px 0 var(--ink);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--lime); color:var(--ink); }
+  a{ color:inherit; }
+  img{max-width:100%; display:block;}
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:700; line-height:1.05; letter-spacing:-0.01em; }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--ink);
+    color:var(--paper);
+    padding:6px 12px;
+    border:2px solid var(--ink);
+  }
+  .eyebrow::before{ content:"//"; color:var(--lime); }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:14px 22px;
+    border:3px solid var(--ink);
+    background:var(--white);
+    color:var(--ink);
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+    text-decoration:none;
+  }
+  .btn:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink); }
+  .btn:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
+  .btn-primary{ background:var(--lime); }
+  .btn-blue{ background:var(--blue); color:var(--white); }
+  .btn-coral{ background:var(--coral); color:var(--white); }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:var(--paper);
+    border-bottom:3px solid var(--ink);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 0;
+  }
+  .logo{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo .dot{ width:14px; height:14px; background:var(--coral); border:2px solid var(--ink); display:inline-block; }
+  .nav-links{ display:flex; gap:28px; font-family:var(--font-mono); font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:.04em;}
+  .nav-links a{ text-decoration:none; border-bottom:2px solid transparent; padding-bottom:2px; }
+  .nav-links a:hover{ border-bottom:2px solid var(--ink); }
+  @media (max-width:800px){ .nav-links{ display:none; } }
+
+  /* ---------- BROWSER CHROME (signature element) ---------- */
+  .chrome{
+    border:3px solid var(--ink);
+    background:var(--white);
+    box-shadow:var(--shadow-lg);
+  }
+  .chrome-bar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--ink);
+    padding:10px 14px;
+    border-bottom:3px solid var(--ink);
+  }
+  .chrome-dot{ width:11px; height:11px; border-radius:50%; }
+  .chrome-dot:nth-child(1){ background:var(--coral); }
+  .chrome-dot:nth-child(2){ background:var(--lime); }
+  .chrome-dot:nth-child(3){ background:var(--blue); }
+  .chrome-url{
+    font-family:var(--font-mono);
+    font-size:12px;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    color:var(--ink);
+    padding:5px 12px;
+    flex:1;
+    max-width:340px;
+  }
+  .chrome-body{ padding:20px; }
+
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section{ padding:90px 0; border-bottom:3px solid var(--ink); }
+  section.alt{ background:var(--paper-alt); }
+  .section-head{ max-width:640px; margin-bottom:48px; }
+  .section-head h2{ font-size:clamp(28px,4vw,42px); margin-top:14px; }
+  .section-head p{ margin-top:14px; font-size:16px; opacity:.8; }
+
+  /* ---------- HERO ---------- */
+  .hero{ padding-top:64px; padding-bottom:80px; border-bottom:3px solid var(--ink); }
+  .hero-grid{ display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:center; }
+  .hero h1{ font-size:clamp(36px,5.6vw,64px); margin-top:18px; }
+  .hero h1 .hl{ background:var(--lime); padding:0 8px; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .hero p.sub{ font-size:18px; margin-top:20px; max-width:480px; opacity:.85; }
+  .hero-cta{ display:flex; gap:16px; margin-top:32px; flex-wrap:wrap; }
+
+  /* fake project grid inside hero chrome */
+  .mini-toolbar{ display:flex; gap:10px; margin-bottom:14px; align-items:center; }
+  .mini-search{ font-family:var(--font-mono); font-size:12px; border:2px solid var(--ink); padding:6px 10px; flex:1; background:var(--paper); }
+  .mini-btn{ font-family:var(--font-mono); font-size:11px; font-weight:700; border:2px solid var(--ink); padding:6px 10px; background:var(--blue); color:var(--white); }
+  .mini-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .mini-card{ border:2px solid var(--ink); padding:10px; background:var(--paper); font-size:11px; }
+  .mini-card .name{ font-family:var(--font-mono); font-weight:700; font-size:12px; }
+  .mini-card .domain{ font-family:var(--font-mono); opacity:.6; margin-top:4px; }
+  .mini-card .icons{ margin-top:8px; display:flex; gap:6px; font-size:12px; }
+  @media (max-width:800px){ .hero-grid{ grid-template-columns:1fr; } .mini-grid{ grid-template-columns:repeat(3,1fr);} }
+  @media (max-width:520px){ .mini-grid{ grid-template-columns:1fr 1fr;} }
+
+  /* ---------- STATS STRIP ---------- */
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); border:3px solid var(--ink); box-shadow:var(--shadow-lg); background:var(--white); }
+  .stat{ padding:26px 20px; text-align:left; }
+  .stat + .stat{ border-left:3px solid var(--ink); }
+  .stat .num{ font-family:var(--font-display); font-size:36px; font-weight:700; }
+  .stat .label{ font-family:var(--font-mono); font-size:12px; text-transform:uppercase; opacity:.7; margin-top:4px; }
+  @media (max-width:700px){ .stats{ grid-template-columns:1fr 1fr;} .stat:nth-child(2){ border-left:3px solid var(--ink);} .stat:nth-child(3){ border-left:none; border-top:3px solid var(--ink);} .stat:nth-child(4){ border-top:3px solid var(--ink);} }
+
+  /* ---------- KEUNGGULAN GRID ---------- */
+  .adv-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .adv-card{ background:var(--white); border:3px solid var(--ink); box-shadow:var(--shadow); padding:26px; }
+  .adv-card .ic{ font-size:26px; }
+  .adv-card h3{ font-size:19px; margin-top:12px; }
+  .adv-card p{ margin-top:8px; font-size:14px; opacity:.8; }
+  .adv-card:nth-child(2){ background:var(--lime); }
+  .adv-card:nth-child(5){ background:var(--blue); color:var(--white); }
+  .adv-card:nth-child(5) p{ color:var(--white); opacity:.9; }
+  @media (max-width:900px){ .adv-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:560px){ .adv-grid{ grid-template-columns:1fr; } }
+
+  /* ---------- FITUR (alternating rows) ---------- */
+  .feature-row{ display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; padding:56px 0; }
+  .feature-row:not(:last-child){ border-bottom:3px dashed var(--ink); }
+  .feature-row.reverse .feature-copy{ order:2; }
+  .feature-row.reverse .feature-visual{ order:1; }
+  .feature-copy .tag{ font-family:var(--font-mono); font-size:12px; font-weight:700; text-transform:uppercase; background:var(--coral); color:var(--white); padding:4px 10px; border:2px solid var(--ink); display:inline-block; }
+  .feature-copy h3{ font-size:26px; margin-top:14px; }
+  .feature-copy p{ margin-top:12px; font-size:15px; opacity:.8; }
+  .feature-copy .benefit{ margin-top:14px; font-family:var(--font-mono); font-size:13px; background:var(--paper-alt); border-left:4px solid var(--ink); padding:8px 12px; }
+  @media (max-width:800px){ .feature-row, .feature-row.reverse{ grid-template-columns:1fr; } .feature-row.reverse .feature-copy, .feature-row.reverse .feature-visual{ order:initial; } }
+
+  /* visual mockups */
+  .visual-inner{ padding:24px; min-height:160px; display:flex; align-items:center; justify-content:center; }
+  .search-mock{ width:100%; }
+  .search-mock input{ width:100%; font-family:var(--font-mono); font-size:13px; border:2px solid var(--ink); padding:10px 12px; background:var(--paper); }
+  .search-mock .results{ margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .search-mock .result{ font-family:var(--font-mono); font-size:12px; border:2px solid var(--ink); padding:8px 10px; background:var(--white); }
+  .search-mock .result.dim{ opacity:.3; }
+
+  .vscode-mock{ display:flex; align-items:center; gap:14px; }
+  .vscode-mock .folder{ font-family:var(--font-mono); font-size:13px; border:2px solid var(--ink); padding:10px 14px; background:var(--paper);}
+  .vscode-mock .arrow{ font-size:22px; }
+  .vscode-mock .code-win{ font-family:var(--font-mono); font-size:11px; border:2px solid var(--ink); background:var(--ink); color:var(--lime); padding:10px 14px; }
+
+  .url-mock{ width:100%; display:flex; flex-direction:column; gap:10px; }
+  .url-mock .row{ display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; }
+  .url-mock .badge{ border:2px solid var(--ink); padding:4px 8px; background:var(--blue); color:var(--white); font-weight:700; font-size:10px; }
+  .url-mock .row div:last-child{ border:2px solid var(--ink); padding:6px 10px; background:var(--paper); flex:1; }
+
+  .ngrok-mock{ font-family:var(--font-mono); font-size:12px; background:var(--ink); color:var(--lime); padding:14px; width:100%; border:2px solid var(--ink); }
+  .ngrok-mock .l1{ opacity:.6; }
+  .ngrok-mock .l2{ color:var(--white); margin-top:6px; }
+  .ngrok-mock .l3{ color:var(--lime); margin-top:6px; }
+
+  .phpinfo-mock{ width:100%; }
+  .phpinfo-mock .row{ display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; padding:6px 0; border-bottom:1px solid var(--ink); }
+  .phpinfo-mock .row:last-child{ border-bottom:none; }
+
+  .toast-mock{ font-family:var(--font-mono); font-size:12px; background:var(--lime); border:2px solid var(--ink); padding:12px 16px; display:inline-flex; align-items:center; gap:8px; box-shadow:var(--shadow-sm); }
+
+  /* ---------- ALUR ---------- */
+  .flow{ display:flex; flex-wrap:wrap; gap:0; align-items:stretch; }
+  .flow-step{ border:3px solid var(--ink); background:var(--white); padding:18px 20px; font-family:var(--font-mono); font-size:13px; font-weight:700; text-align:center; min-width:150px; flex:1; }
+  .flow-arrow{ display:flex; align-items:center; justify-content:center; padding:0 10px; font-size:22px; }
+  .flow-branches{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:24px; }
+  .branch{ border:3px solid var(--ink); background:var(--paper-alt); padding:14px 10px; text-align:center; font-family:var(--font-mono); font-size:12px; font-weight:700; }
+  .branch:nth-child(1){ background:var(--lime); }
+  .branch:nth-child(3){ background:var(--blue); color:var(--white); }
+  .branch:nth-child(5){ background:var(--coral); color:var(--white); }
+  @media (max-width:800px){ .flow{ flex-direction:column; } .flow-arrow{ transform:rotate(90deg); padding:6px 0; } .flow-branches{ grid-template-columns:1fr 1fr; } }
+
+  /* ---------- TEKNOLOGI ---------- */
+  .stack-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .stack-col h4{ font-family:var(--font-mono); font-size:13px; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:8px 12px; }
+  .stack-col ul{ list-style:none; border:3px solid var(--ink); border-top:none; }
+  .stack-col li{ font-family:var(--font-mono); font-size:14px; padding:12px 14px; border-bottom:2px solid var(--ink); background:var(--white); }
+  .stack-col li:last-child{ border-bottom:none; }
+  @media (max-width:800px){ .stack-grid{ grid-template-columns:1fr; } }
+
+  /* ---------- STUDI KASUS ---------- */
+  .compare{ width:100%; border-collapse:collapse; border:3px solid var(--ink); background:var(--white); }
+  .compare th, .compare td{ border:2px solid var(--ink); padding:14px 16px; font-size:14px; text-align:left; }
+  .compare th{ font-family:var(--font-mono); text-transform:uppercase; font-size:12px; background:var(--ink); color:var(--paper); }
+  .compare td.hemat{ font-family:var(--font-mono); font-weight:700; color:var(--ink); background:var(--lime); }
+  .compare-wrap{ overflow-x:auto; }
+  .big-stat{ margin-top:32px; border:3px solid var(--ink); background:var(--coral); color:var(--white); padding:32px; display:flex; align-items:baseline; gap:18px; box-shadow:var(--shadow-lg); }
+  .big-stat .n{ font-family:var(--font-display); font-size:56px; font-weight:700; }
+  .big-stat .t{ font-family:var(--font-mono); font-size:14px; text-transform:uppercase; }
+  @media (max-width:560px){ .big-stat{ flex-direction:column; gap:6px; } }
+
+  /* ---------- FAQ ---------- */
+  .faq-item{ border:3px solid var(--ink); background:var(--white); margin-bottom:14px; box-shadow:var(--shadow-sm); }
+  .faq-item summary{ cursor:pointer; list-style:none; padding:16px 20px; font-family:var(--font-display); font-weight:600; font-size:15px; display:flex; justify-content:space-between; align-items:center; }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{ content:"+"; font-size:22px; font-family:var(--font-mono); }
+  .faq-item[open] summary::after{ content:"–"; }
+  .faq-item[open] summary{ border-bottom:2px solid var(--ink); background:var(--lime); }
+  .faq-item .body{ padding:16px 20px; font-size:14px; opacity:.85; }
+
+  /* ---------- INSTALASI ---------- */
+  .steps{ counter-reset:step; }
+  .step{ display:grid; grid-template-columns:52px 1fr; gap:18px; margin-bottom:26px; }
+  .step .n{ counter-increment:step; font-family:var(--font-display); font-weight:700; font-size:22px; width:52px; height:52px; border:3px solid var(--ink); display:flex; align-items:center; justify-content:center; background:var(--blue); color:var(--white); }
+  .step .n::before{ content: counter(step, decimal-leading-zero); }
+  .step h4{ font-size:17px; }
+  .step p{ font-size:14px; opacity:.8; margin-top:4px; }
+  .code-block{ font-family:var(--font-mono); font-size:13px; background:var(--ink); color:var(--lime); padding:14px 16px; margin-top:10px; border:2px solid var(--ink); overflow-x:auto; white-space:pre; }
+
+  /* ---------- CTA / FOOTER ---------- */
+  .cta-section{ text-align:center; padding:100px 0; }
+  .cta-section h2{ font-size:clamp(30px,5vw,50px); }
+  .cta-section p{ margin-top:16px; font-size:16px; opacity:.8; max-width:480px; margin-left:auto; margin-right:auto; }
+  .cta-buttons{ display:flex; gap:16px; justify-content:center; margin-top:32px; flex-wrap:wrap; }
+
+  footer{ background:var(--ink); color:var(--paper); padding:48px 0 28px; }
+  .footer-grid{ display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:32px; }
+  .footer-grid h4{ font-family:var(--font-mono); font-size:12px; text-transform:uppercase; color:var(--lime); margin-bottom:12px; letter-spacing:.06em; }
+  .footer-grid a{ display:block; font-size:13px; opacity:.8; margin-bottom:8px; text-decoration:none; }
+  .footer-grid a:hover{ opacity:1; text-decoration:underline; }
+  .footer-bottom{ margin-top:40px; padding-top:20px; border-top:2px solid #333; display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12px; opacity:.6; flex-wrap:wrap; gap:10px; }
+  @media (max-width:700px){ .footer-grid{ grid-template-columns:1fr; } }
+
+  .badge-mit{ font-family:var(--font-mono); font-size:11px; border:2px solid var(--lime); color:var(--lime); padding:3px 8px; display:inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot"></span>LARAGON_HUB</div>
+      <div class="nav-links">
+        <a href="#fitur">Fitur</a>
+        <a href="#alur">Alur</a>
+        <a href="#studi-kasus">Studi Kasus</a>
+        <a href="#faq">FAQ</a>
+        <a href="#instalasi">Instalasi</a>
+      </div>
+      <a href="#instalasi" class="btn btn-primary">Download</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Pengganti index Laragon bawaan</span>
+      <h1>Localhost Anda<br><span class="hl">bukan lagi</span><br>daftar folder mentah.</h1>
+      <p class="sub">Laragon Hub mengubah halaman default Laragon jadi dashboard satu klik: lihat semua proyek, buka di browser atau VS Code, dan bagikan ke internet — tanpa database, tanpa install tambahan.</p>
+      <div class="hero-cta">
+        <a href="#instalasi" class="btn btn-primary">⬇ Clone ke C:\laragon\www</a>
+        <a href="#fitur" class="btn">Lihat semua fitur</a>
+      </div>
+    </div>
+
+    <div class="chrome">
+      <div class="chrome-bar">
+        <span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span>
+        <div class="chrome-url">localhost/laragon-hub</div>
+      </div>
+      <div class="chrome-body">
+        <div class="mini-toolbar">
+          <div class="mini-search">🔍 cari proyek…</div>
+          <div class="mini-btn">NGROK</div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <div class="name">devstore</div>
+            <div class="domain">devstore.test</div>
+            <div class="icons">🌐 🖥️ 📋</div>
+          </div>
+          <div class="mini-card">
+            <div class="name">api-sanctum</div>
+            <div class="domain">api-sanctum.test</div>
+            <div class="icons">🌐 🖥️ 📋</div>
+          </div>
+          <div class="mini-card">
+            <div class="name">portofolio</div>
+            <div class="domain">portofolio.test</div>
+            <div class="icons">🌐 🖥️ 📋</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TENTANG / STATS -->
+<section id="tentang">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Kenapa dibuat</span>
+      <h2>Satu file PHP, satu masalah yang benar-benar mengganggu.</h2>
+      <p>Setiap kali mau buka proyek, developer Laragon harus mengetik URL manual, buka Explorer folder demi folder, atau repot dengan CMD untuk hal sepele. Laragon Hub menggantikan semua itu dengan satu halaman: semua proyek terlihat, semua aksi tersedia dalam satu klik.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="num">1</div><div class="label">File PHP, zero build step</div></div>
+      <div class="stat"><div class="num">0</div><div class="label">Database & migrasi</div></div>
+      <div class="stat"><div class="num">94%</div><div class="label">Lebih cepat akses proyek</div></div>
+      <div class="stat"><div class="num">~12KB</div><div class="label">Ukuran total aplikasi</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- KEUNGGULAN -->
+<section class="alt">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Keunggulan</span>
+      <h2>Dibangun untuk cepat, bukan untuk pamer stack.</h2>
+    </div>
+    <div class="adv-grid">
+      <div class="adv-card"><div class="ic">⚡</div><h3>Cepat</h3><p>Scan filesystem langsung tanpa database — halaman termuat dalam milidetik, tanpa booting framework.</p></div>
+      <div class="adv-card"><div class="ic">🔍</div><h3>Filter real-time</h3><p>Ketik nama proyek, grid langsung menyaring hasil. Tanpa tombol search, tanpa reload halaman.</p></div>
+      <div class="adv-card"><div class="ic">🖥️</div><h3>Auto-scan</h3><p>Setiap proyek baru di <code>C:\laragon\www</code> otomatis muncul di grid. Tidak perlu registrasi.</p></div>
+      <div class="adv-card"><div class="ic">🚀</div><h3>One-click actions</h3><p>Buka via localhost, domain <code>.test</code>, atau langsung ke VS Code — dari satu kartu proyek.</p></div>
+      <div class="adv-card"><div class="ic">🔒</div><h3>IP shield</h3><p>Akses otomatis dibatasi ke IP lokal dan private network. IP publik langsung dialihkan.</p></div>
+      <div class="adv-card"><div class="ic">📱</div><h3>Responsive</h3><p>Grid adaptif dari 1 kolom di mobile hingga 3 kolom di desktop.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FITUR -->
+<section id="fitur">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Fitur utama</span>
+      <h2>Setiap kartu proyek, satu cockpit kecil.</h2>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <span class="tag">Project Grid</span>
+        <h3>Semua proyek, satu layar.</h3>
+        <p>Tampilan semua proyek Laragon dalam bentuk kartu rapi. Setiap kartu menampilkan domain, path, dan status auto vhost.</p>
+        <div class="benefit">→ Lihat seluruh workspace tanpa buka File Explorer.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner">
+          <div class="mini-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="mini-card"><div class="name">blog-app</div><div class="domain">blog-app.test</div></div>
+            <div class="mini-card"><div class="name">crm-lite</div><div class="domain">crm-lite.test</div></div>
+            <div class="mini-card"><div class="name">shop-ui</div><div class="domain">shop-ui.test</div></div>
+            <div class="mini-card"><div class="name">rest-api</div><div class="domain">rest-api.test</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-copy">
+        <span class="tag">Live Search</span>
+        <h3>Cari, langsung ketemu.</h3>
+        <p>Filter real-time berdasarkan nama proyek. Hasil berubah saat Anda mengetik — tanpa delay, tanpa tombol.</p>
+        <div class="benefit">→ Temukan proyek di antara puluhan folder dalam hitungan detik.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner search-mock">
+          <div>
+            <input type="text" value="dev█" readonly>
+            <div class="results">
+              <div class="result">devstore.test</div>
+              <div class="result">devtools-panel.test</div>
+              <div class="result dim">blog-app.test</div>
+              <div class="result dim">crm-lite.test</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <span class="tag">VS Code Launcher</span>
+        <h3>Satu klik, editor terbuka.</h3>
+        <p>Tombol untuk membuka folder proyek langsung di VS Code, menggunakan <code>code</code> CLI melalui AJAX — halaman tidak reload.</p>
+        <div class="benefit">→ Buka code editor tanpa navigasi folder manual.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner vscode-mock">
+          <div class="folder">📁 devstore</div>
+          <div class="arrow">→</div>
+          <div class="code-win">code .<br>opening…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-copy">
+        <span class="tag">Dual URL Access</span>
+        <h3>Dua pintu masuk, satu proyek.</h3>
+        <p>Setiap proyek bisa diakses via dua cara: <code>localhost/nama-proyek</code> dan <code>nama-proyek.test</code> (virtual host Laragon).</p>
+        <div class="benefit">→ Fleksibel memilih akses sesuai kebutuhan development.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner url-mock">
+          <div class="row"><span class="badge">A</span><div>localhost/devstore</div></div>
+          <div class="row"><span class="badge" style="background:var(--coral)">B</span><div>devstore.test</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <span class="tag">Ngrok Tunnel</span>
+        <h3>Demo ke klien, tanpa deploy.</h3>
+        <p>Bagikan proyek lokal ke klien atau tim dalam satu klik. Cukup masukkan URL Ngrok sekali di toolbar.</p>
+        <div class="benefit">→ Tunnel langsung dari lokal, tanpa proses deploy.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">cmd.exe</div></div>
+        <div class="visual-inner">
+          <div class="ngrok-mock">
+            <div class="l1">C:\laragon\www&gt;</div>
+            <div class="l2">start cmd /k ngrok http 443 --host-header=devstore.test</div>
+            <div class="l3">Forwarding → https://xxxx-xx-xxx.ngrok-free.app</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-copy">
+        <span class="tag">PHP Info Modal</span>
+        <h3>Debug environment, secepat kedip.</h3>
+        <p>Lihat konfigurasi PHP lengkap dalam modal overlay. Data diambil via AJAX, tidak perlu navigasi ke halaman terpisah.</p>
+        <div class="benefit">→ Cek environment PHP kapan saja tanpa tab baru.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner phpinfo-mock">
+          <div>
+            <div class="row"><span>PHP Version</span><span>8.2.4</span></div>
+            <div class="row"><span>Server API</span><span>Apache</span></div>
+            <div class="row"><span>Max Upload</span><span>40M</span></div>
+            <div class="row"><span>Memory Limit</span><span>512M</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-copy">
+        <span class="tag">Copy URL</span>
+        <h3>Salin, langsung tempel.</h3>
+        <p>Salin URL proyek ke clipboard dengan satu klik. Notifikasi toast mengonfirmasi aksi.</p>
+        <div class="benefit">→ Bagikan link proyek tanpa seleksi teks manual.</div>
+      </div>
+      <div class="feature-visual chrome">
+        <div class="chrome-bar"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">localhost</div></div>
+        <div class="visual-inner">
+          <div class="toast-mock">✅ URL disalin ke clipboard</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ALUR -->
+<section class="alt" id="alur">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Alur penggunaan</span>
+      <h2>Dari buka browser sampai proyek tampil, tiga langkah.</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-step">1. Buka<br>localhost</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">2. Lihat grid<br>proyek</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">3. Cari proyek<br>(opsional)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">4. Pilih aksi</div>
+    </div>
+    <div class="flow-branches">
+      <div class="branch">Open<br>localhost</div>
+      <div class="branch">Open<br>.test</div>
+      <div class="branch">Buka<br>VS Code</div>
+      <div class="branch">Copy<br>URL</div>
+      <div class="branch">Share<br>via Ngrok</div>
+    </div>
+  </div>
+</section>
+
+<!-- TEKNOLOGI -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Teknologi</span>
+      <h2>Tanpa framework. Tanpa alasan untuk lambat.</h2>
+      <p>Satu file <code>index.php</code>, PHP vanilla, dan scan filesystem langsung — server: Apache/Nginx via Laragon, deploy: clone ke <code>C:\laragon\www</code>, zero build step.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-col">
+        <h4>Frontend</h4>
+        <ul>
+          <li>Tailwind CSS (CDN)</li>
+          <li>Vanilla JavaScript</li>
+          <li>AJAX Fetch API</li>
+        </ul>
+      </div>
+      <div class="stack-col">
+        <h4>Backend</h4>
+        <ul>
+          <li>PHP 8+ (vanilla)</li>
+          <li>No framework</li>
+          <li>Filesystem scan</li>
+        </ul>
+      </div>
+      <div class="stack-col">
+        <h4>Utility</h4>
+        <ul>
+          <li>Font Awesome 6</li>
+          <li>Space Grotesk / Inter</li>
+          <li>JetBrains Mono</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STUDI KASUS -->
+<section class="alt" id="studi-kasus">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Studi kasus</span>
+      <h2>15+ proyek, satu masalah yang sama tiap hari.</h2>
+      <p>Sebelum: buka Explorer, cari folder, copy nama, ketik manual di browser. Sesudah: buka localhost, klik, selesai.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr><th>Aktivitas</th><th>Tanpa Laragon Hub</th><th>Dengan Laragon Hub</th><th>Hemat</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Buka proyek</td><td>30 detik</td><td>3 detik</td><td class="hemat">90%</td></tr>
+          <tr><td>Buka di VS Code</td><td>20 detik</td><td>1 detik</td><td class="hemat">95%</td></tr>
+          <tr><td>Cari proyek</td><td>15 detik</td><td>1 detik</td><td class="hemat">93%</td></tr>
+          <tr><td>Share ke klien</td><td>5 menit</td><td>10 detik</td><td class="hemat">97%</td></tr>
+          <tr><td>Cek PHP Info</td><td>1 menit</td><td>2 detik</td><td class="hemat">97%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="big-stat">
+      <div class="n">94%</div>
+      <div class="t">rata-rata lebih cepat dibanding cara manual</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">FAQ</span>
+      <h2>Pertanyaan yang paling sering ditanyakan.</h2>
+    </div>
+
+    <details class="faq-item" open>
+      <summary>Apakah Laragon Hub perlu database?</summary>
+      <div class="body">Tidak. Laragon Hub 100% berbasis filesystem — scan folder <code>www</code> langsung, tanpa database, tanpa migrasi, tanpa query.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Bagaimana cara install?</summary>
+      <div class="body">Clone atau download <code>index.php</code> ke <code>C:\laragon\www</code>, lalu akses <code>http://localhost/home-laragon</code>. Zero build step.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Apakah aplikasi ini mengganggu proyek yang sudah ada?</summary>
+      <div class="body">Tidak. Laragon Hub hanya membaca direktori — tidak memodifikasi file proyek Anda sama sekali.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Kenapa saya diarahkan ke restricted.php?</summary>
+      <div class="body">Karena diakses dari IP publik. Laragon Hub hanya bisa diakses dari localhost atau jaringan lokal, demi keamanan.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Apakah bisa diakses dari HP atau tablet?</summary>
+      <div class="body">Bisa, selama perangkat terhubung ke jaringan lokal yang sama. Grid responsif menyesuaikan ukuran layar.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Apakah ada versi untuk Mac atau Linux?</summary>
+      <div class="body">Saat ini khusus Windows + Laragon. Karena memakai PHP murni, adaptasi ke environment lain sangat memungkinkan.</div>
+    </details>
+  </div>
+</section>
+
+<!-- INSTALASI -->
+<section class="alt" id="instalasi">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Instalasi</span>
+      <h2>Lima langkah, tanpa build step.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Clone project</h4>
+          <p>Clone repository ke direktori proyek Anda.</p>
+          <div class="code-block">cd C:\laragon\www
+git clone https://github.com/username/home-laragon.git</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Konfigurasi Ngrok (opsional)</h4>
+          <p>Install Ngrok CLI, pastikan tersedia di PATH Windows, lalu ganti variabel <code>$url</code> di <code>index.php</code> dengan URL Ngrok Anda.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Akses dashboard</h4>
+          <p>Buka browser dan akses proyeknya.</p>
+          <div class="code-block">http://localhost/home-laragon</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Verifikasi instalasi</h4>
+          <p>Pastikan dashboard muncul, search filter berfungsi, tombol aksi bekerja, dan modal PHP Info dapat dibuka.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h4>Setup VS Code CLI (opsional)</h4>
+          <p>Pastikan VS Code CLI terdaftar di PATH agar fitur launcher siap digunakan.</p>
+          <div class="code-block">code .</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="wrap">
+    <span class="eyebrow">Mulai sekarang</span>
+    <h2 style="margin-top:14px;">Timpa index default Laragon<br>Anda hari ini.</h2>
+    <p>Satu file PHP. Tidak ada instalasi rumit, tidak ada database, tidak ada biaya. Clone dan langsung jalan.</p>
+    <div class="cta-buttons">
+      <a href="#instalasi" class="btn btn-primary">⬇ Download index.php</a>
+      <a href="#" class="btn btn-blue">GitHub Repository</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4>Laragon Hub</h4>
+        <p style="font-size:13px; opacity:.75; max-width:280px;">Dashboard modern untuk mengelola workspace Laragon Anda. Dibuat untuk developer Laragon di seluruh Indonesia.</p>
+        <div style="margin-top:14px;" class="badge-mit">MIT LICENSE</div>
+      </div>
+      <div>
+        <h4>Navigasi</h4>
+        <a href="#fitur">Fitur</a>
+        <a href="#alur">Alur Penggunaan</a>
+        <a href="#studi-kasus">Studi Kasus</a>
+        <a href="#faq">FAQ</a>
+        <a href="#instalasi">Instalasi</a>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <a href="mailto:email@anda.com">📧 email@anda.com</a>
+        <a href="#">💬 github.com/username/home-laragon</a>
+        <a href="#">🐦 @username</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 Laragon Hub. All rights reserved.</span>
+      <span>v1.0.0</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
