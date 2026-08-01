@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akses Terbatas - Laragon Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrojFfKjJ/l7JtLzPqG6E7i/K2wS6w+05+0FfF/YQ6tG9+w/x8fJ5A7oB5eQ6g2iQ8P9A0dF/l9Y6tO6w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="assets/js/tailwind.js"></script>
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
     <style>
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
